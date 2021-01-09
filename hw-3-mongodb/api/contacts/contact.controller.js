@@ -43,36 +43,22 @@ class ContactController {
     }
   }
 
-  // async deleteContactById(req, res, next) {
-  //   try {
-  //     const contactId = req.params.id;
+  async deleteContactById(req, res, next) {
+    try {
+      const contactId = req.params.id;
 
-  //     const deletedContact = await contactModel.findByIdAndDelete(contactId);
+      const deletedContact = await contactModel.findByIdAndDelete(contactId);
 
-  //     if (!deletedContact) {
-  //       return res
-  //         .status(404)
-  //         .json({ message: `contact with id:${contactId} not found` });
-  //     }
+      if (!deletedContact) {
+        return res
+          .status(404)
+          .json({ message: `contact with id:${contactId} not found` });
+      }
 
-  //     return res.status(204).send();
-  //   } catch (err) {
-  //     next(err);
-  //   }
-  // }
-
-  deleteContactById(req, res) {
-    const contactId = req.params.id;
-
-    const deletedContact = contactModel.findByIdAndDelete(contactId);
-
-    if (!deletedContact) {
-      return res
-        .status(404)
-        .json({ message: `contact with id:${contactId} not found` });
+      return res.status(204).send();
+    } catch (err) {
+      next(err);
     }
-
-    return res.status(204).send();
   }
 
   async updateContact(req, res, next) {
