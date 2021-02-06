@@ -1,7 +1,8 @@
+const fs = require("fs");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
-const { AvatarGenerator } = require("random-avatar-generator");
+const Avatar = require("avatar-builder");
 const userModel = require("../users/user.model");
 const {
   UnauthorizedError,
@@ -9,12 +10,18 @@ const {
   ValidationError,
 } = require("../helpers/errors.constructors");
 
-const generator = new AvatarGenerator();
-
 class AuthController {
   async register(req, res, next) {
     try {
       const { email, password } = req.body;
+
+      const avatar = Avatar.male8bitBuilder(128);
+
+      avatar
+        .create(email)
+        .then((buffer) =>
+          fs.writeFileSync(`public/images/avatar-${email}.png`, buffer)
+        );
 
       const userExist = await userModel.findOne({ email });
       if (userExist) {
@@ -24,7 +31,7 @@ class AuthController {
       await userModel.create({
         ...req.body,
         password: await bcrypt.hash(password, 10),
-        avatarURL: generator.generateRandomAvatar(),
+        avatarURL: `http://localhost:${process.env.PORT}/images/avatar-${email}.png`,
       });
 
       return res
