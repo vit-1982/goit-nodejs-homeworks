@@ -15,6 +15,11 @@ class AuthController {
     try {
       const { email, password } = req.body;
 
+      const userExist = await userModel.findOne({ email });
+      if (userExist) {
+        throw new ConflictError("Email in use");
+      }
+
       const avatar = Avatar.male8bitBuilder(128);
 
       avatar
@@ -22,11 +27,6 @@ class AuthController {
         .then((buffer) =>
           fs.writeFileSync(`public/images/avatar-${email}.png`, buffer)
         );
-
-      const userExist = await userModel.findOne({ email });
-      if (userExist) {
-        throw new ConflictError("Email in use");
-      }
 
       await userModel.create({
         ...req.body,
