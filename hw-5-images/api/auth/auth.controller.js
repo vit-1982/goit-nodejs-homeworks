@@ -1,15 +1,14 @@
+const fs = require("fs");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
-const { AvatarGenerator } = require("random-avatar-generator");
+const Avatar = require("avatar-builder");
 const userModel = require("../users/user.model");
 const {
   UnauthorizedError,
   ConflictError,
   ValidationError,
 } = require("../helpers/errors.constructors");
-
-const generator = new AvatarGenerator();
 
 class AuthController {
   async register(req, res, next) {
@@ -21,10 +20,18 @@ class AuthController {
         throw new ConflictError("Email in use");
       }
 
+      const avatar = Avatar.male8bitBuilder(128);
+
+      avatar
+        .create(email)
+        .then((buffer) =>
+          fs.writeFileSync(`public/images/avatar-${email}.png`, buffer)
+        );
+
       await userModel.create({
         ...req.body,
         password: await bcrypt.hash(password, 10),
-        avatarURL: generator.generateRandomAvatar(),
+        avatarURL: `http://localhost:${process.env.PORT}/images/avatar-${email}.png`,
       });
 
       return res
